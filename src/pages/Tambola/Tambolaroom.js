@@ -1,124 +1,84 @@
-// import React, {useState, useEffect} from 'react';
-// import {useParams} from 'react-router-dom'
-// import { SocketContext, socket } from './socketconfig';
-// import "./TambolaRoom.css";
-
-// const Room = () => {
-//     const [selectedValues , nextSelectedValue] = useState([]);
-//     const [users , setusers] = useState([]);
-//     const {roomid}  = useParams();
-//     socket.on("getusers",(obj)=>{
-//         setusers(obj.data);
-//     })
-//     useEffect(() => {
-//         socket.emit("getusers", roomid);
-//     }, [socket, roomid])
-
-//     return (
-//         <div className="Room">
-//             <h1>{users}</h1>
-//             <h1>{roomid}</h1>
-//         </div>
-//     );
-// }
-
-// export default Room;
-
-
-import React, { Component } from 'react';
+import React, {useState, useEffect} from 'react';
+import {useParams} from 'react-router-dom'
+import { SocketContext, socket } from './socketconfig';
 import "./TambolaRoom.css";
 
-class Room extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      nextSelectedValue: null,
-      selectedValues: [true].concat([...Array(90).keys()].map(index => false))
-    };
+const Room = () => {
+    const value = "Generated Number";
+    const [randNum , setRandNum] = useState(value);
+    const [users , setusers] = useState([]);
+    const {roomid}  = useParams();
+    socket.on("getusers",(obj)=>{
+        setusers(obj.data);
+    })
+    useEffect(() => {
+        socket.emit("getusers", roomid);
+    }, [socket, roomid])
 
-    this.onClick = this.onClick.bind(this);
-    // setInterval(this.onClick,3000);
-  }
 
-  render() {
+    let i = 0;
+    const clickEvent = () => {
+      setRandNum(RandNum[i++]);
+    }
+
+    const CardData =[
+      [0,18,23,40,48,0,0,73,0],
+      [5,0,0,0,42,52,0,80,83],
+      [0,20,0,0,49,58,65,72,85]
+    ];
+
+    const RandNum =[72,65,47,89,42,4,61,84,36,22,37,18,9,27,
+      12,71,46,15,30,55,17,3,56,25,68,80,43,26,
+      50,39,53,38,60,31,28,11,8,62,49,79,51,35,
+      14,67,45,41,40,5,44,34,73,32,86,69,70,48,
+      21,33,83,13,54,77,78,90,29,6,52,59,58,66,
+      76,1,10,24,19,64,85,7,74,2,16,63,88,23,57
+      ,87,81,82,20,75
+    ];
+
     return (
-      <div className="App">
-        <center>
-          <button className="GenerateButton mt-4" onClick={this.onClick}>
-            Generate Number
-          </button>
-          <LastValue value={this.state.nextSelectedValue} />
-          <table>
-            <tbody>
-              <Grid selectedValues={this.state.selectedValues} />
-            </tbody>
-          </table>
-            <ol className="mt-4">
-                <li className="btn-game"> Jaldi 5</li>
-                <li className="btn-game"> Corners</li>
-                <li className="btn-game"> First Row</li>
-                <li className="btn-game"> Second Row</li>
-                <li className="btn-game"> Third Row</li>
-                <li className="btn-game"> Full Housie</li>
-            </ol>
-        </center>
-      </div>
+      <>
+        <div className="container">
+          <div className="row">
+            <div className="col-lg-4 col-md-6 col-sm-8 col-12 mx-auto">
+              <h1>{users}</h1>
+              <h1 className="room-id">Room Id : {roomid}</h1>
+              <div className="gernerate-number-btn" onClick={clickEvent}>Gernerate Number</div>
+              <div className="gernerated-number">{randNum}</div>
+              <div >
+                <Table body={CardData} bgcolor={randNum}/>
+              </div>
+              <ul>
+                <li>Jaldi 5</li>
+                <li>Corners</li>
+                <li>Row First</li>
+                <li>Row Second</li>
+                <li>Row Third</li>
+                <li>Full Housie</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </>
     );
-  }
-
-  onClick() {
-    const oldSelectedValues = this.state.selectedValues;
-    const nextSelectedValue = this.getNextSelectedValue(oldSelectedValues);
-    const newSelectedValues = oldSelectedValues.map((item, index) => {
-      if (index === nextSelectedValue) {
-        return true;
-      }
-      return item;
-    });
-
-    this.setState({
-      nextSelectedValue,
-      selectedValues: newSelectedValues
-    });
-  }
-
-  getNextSelectedValue(selectedValues) {
-    const candidates = selectedValues
-      .map((selected, index) => (!selected ? index : null))
-      .filter(value => value !== null);
-
-    return candidates[Math.floor(Math.random() * candidates.length)];
-  }
 }
 
-const Grid = (props) =>
-  [...Array(3).keys()].map(rowIndex => (
-    <tr key={rowIndex}>
-      {[...Array(10).keys()].map(columnIndex => {
-        let currentIndex = rowIndex * 10 + columnIndex + 1;
-        return (
-          <td key={columnIndex}>
-            <Cell
-              key={currentIndex}
-              selected={props.selectedValues[currentIndex]}
-              value={currentIndex}
-            />
-          </td>
-        );
-      })}
-    </tr>
-  ));
-
-const Cell = (props) => (
-    <div className={props.selected ? 'SelectedCell' : 'UnselectedCell'}>
-      {props.value}
-    </div>
+const Table = (props) => {
+  return (
+    <table className="text-warning mx-auto mb-4">
+        <tbody>
+            {props.body.map((row,index) => <TableRow key={index} row={row}  bgColor={props.bgcolor} />)}
+        </tbody>
+    </table>
 );
+}
 
-const LastValue = (props) => (
-    <p className="NextSelectedValue" onClick={props.onClick}>
-      {props.value ? props.value : 'Random Number'}
-    </p>
-  );
+const TableRow = (props) => {
+    return (
+      <tr>
+          {props.row.map((val,index) => <td className={props.bgColor==val?"SelectedCell":""}>{val}</td>)}
+      </tr>
+    );
+}
 
 export default Room;
